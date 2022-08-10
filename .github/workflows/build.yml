@@ -5,14 +5,14 @@ on:
   pull_request:
     branches: ["master"]
 jobs:
-  build:
+  Linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: sudo apt update && sudo apt install --yes libgtest-dev librtmp-dev
-      - name: make
+      - name: make linux binary
         run: make -C ui/linux
-      - name: make
+      - name: make AppImage
         run: make -C ui/linux Peercast_YT-x86_64.AppImage
       - name: test
         run: make -C ui/linux/tests && cd ui/linux/tests && ./test-all && cd ../../../bvt && cp -R ../ui/linux/peercast-yt . && ruby test-all.rb
@@ -23,15 +23,10 @@ jobs:
           files: |
             ./src-tauri/target/release/bundle/msi/*.msi
             *.zip
-      - name: Upload linux binary directory
-        uses: actions/upload-artifact@v3
-        with:
-          name: directory
-          path: ui/linux/peercast-yt
       - name: Upload linux binary
         uses: actions/upload-artifact@v3
         with:
-          name: tgz
+          name: .tar.gz
           path: ui/linux/peercast-yt-linux-x86_64.tar.gz
       - name: Upload AppImage
         uses: actions/upload-artifact@v3
