@@ -45,6 +45,7 @@ jobs:
           install: >-
             make
             mingw-w64-x86_64-clang
+            mingw-w64-x86_64-gtest<1.11
             mingw-w64-x86_64-make
             mingw-w64-x86_64-openssl
             mingw-w64-x86_64-pkg-config
@@ -53,6 +54,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: make
         run: make --directory=ui/mingui
+      - name: make
+        run: make --directory=ui/mingui/tests
       - name: Upload
         uses: actions/upload-artifact@v3
         with:
