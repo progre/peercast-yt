@@ -27,6 +27,7 @@ CXXFLAGS += -g -Wno-multichar -Wno-unused-variable -std=c++11
 
 LDFLAGS = 
 LIBS = -lwinpthread -lws2_32 -lShlwapi $(shell pkg-config librtmp --libs) $(shell pkg-config openssl --libs)
+LIBS += -lgtest
 
 # All tests produced by this Makefile.  Remember to add new tests you
 # created to the list.
@@ -43,34 +44,6 @@ all : $(TESTS)
 clean :
 	rm -f $(TESTS) *.a *.o
 
-# Builds gtest.a and gtest_main.a.
-
-# Usually you shouldn't tweak such internal variables, indicated by a
-# trailing _.
-# GTEST_SRCS_ = $(wildcard $(GTEST_DIR)/src/*.cpp) $(wildcard $(GTEST_DIR)/src/*.h) $(GTEST_HEADERS)
-
-# For simplicity and to avoid depending on Google Test's
-# implementation details, the dependencies specified below are
-# conservative and not optimized.  This is fine as Google Test
-# compiles fast and for ordinary users its source rarely changes.
-gtest-all.o : $(GTEST_SRCS_)
-	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
-             $(GTEST_DIR)/src/gtest-all.cc
-
-# gtest_main.o : $(GTEST_SRCS_)
-# 	$(CXX) $(CPPFLAGS) -I$(GTEST_DIR) $(CXXFLAGS) -c \
-#             $(GTEST_DIR)/src/gtest_main.cc
-
-gtest.a : gtest-all.o
-	$(AR) $(ARFLAGS) $@ $^
-
-# gtest_main.a : gtest-all.o gtest_main.o
-# 	$(AR) $(ARFLAGS) $@ $^
-
-# Builds a sample test.  A test should link with either gtest.a or
-# gtest_main.a, depending on whether it defines its own main()
-# function.
-
 SRC = ../../../tests/main.cpp $(wildcard ../../../tests/*_unittest.cpp)
 
 OBJS = $(notdir $(SRC:.cpp=.o))
@@ -78,5 +51,5 @@ OBJS = $(notdir $(SRC:.cpp=.o))
 $(OBJS): %.o : ../../../tests/%.cpp $(wildcard $(USER_DIR)/*.h) $(GTEST_HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
 
-test-all : $(OBJS) ../libpeercast.a gtest.a
+test-all : $(OBJS) ../libpeercast.a
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LIBS)
