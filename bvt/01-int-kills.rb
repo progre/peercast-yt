@@ -2,7 +2,7 @@
 require 'fileutils'
 require_relative 'common'
 
-if RUBY_PLATFORM =~ /msys/
+if RUBY_PLATFORM =~ /mingw32/
   puts "skipped"
   exit 0
 end
