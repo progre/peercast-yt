@@ -1,6 +1,9 @@
 ui/linux/html/
 ui/linux/public/
 ui/linux/peercast-yt/
+ui/mingui/html/
+ui/mingui/public/
+ui/mingui/peercast-yt/
 ui/html/
 ui/public/
 peercast

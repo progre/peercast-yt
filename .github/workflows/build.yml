@@ -1,0 +1,63 @@
+name: Build
+on:
+  push:
+    branches: ["master"]
+  pull_request:
+    branches: ["master"]
+jobs:
+  Linux:
+    runs-on: ubuntu-latest
+    steps:
+      - run: sudo apt update && sudo apt install --yes libgtest-dev librtmp-dev
+      - uses: actions/checkout@v3
+      - name: make linux binary
+        run: make -C ui/linux
+      - name: make AppImage
+        run: make -C ui/linux Peercast_YT-x86_64.AppImage
+      - name: test
+        run: make -C ui/linux/tests && cd ui/linux/tests && ./test-all && cd ../../../bvt && cp -R ../ui/linux/peercast-yt . && ruby test-all.rb
+      - name: release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            ./src-tauri/target/release/bundle/msi/*.msi
+            *.zip
+      - name: Upload .tar.gz
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux (.tar.gz)
+          path: ui/linux/peercast-yt-linux-x86_64.tar.gz
+      - name: Upload AppImage
+        uses: actions/upload-artifact@v3
+        with:
+          name: Linux (AppImage)
+          path: ui/linux/Peercast_YT-x86_64.AppImage
+  Windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: >-
+            make
+            mingw-w64-x86_64-clang
+            mingw-w64-x86_64-gtest
+            mingw-w64-x86_64-make
+            mingw-w64-x86_64-openssl
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-rtmpdump-git
+            mingw-w64-x86_64-ruby
+      - uses: actions/checkout@v3
+      - name: make
+        run: make --directory=ui/mingui
+      - name: test
+        run: make --directory=ui/mingui/tests && cd ui/mingui/tests && ./test-all && cd ../../../bvt && cp -R ../ui/mingui/peercast-yt . && ruby test-all.rb
+      - name: Upload
+        uses: actions/upload-artifact@v3
+        with:
+          name: Windows
+          path: ui/mingui/peercast-yt-mingw64_nt-*.tar.gz
